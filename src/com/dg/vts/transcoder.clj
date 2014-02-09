@@ -8,6 +8,9 @@
            [java.util Date]
            [java.nio.file StandardCopyOption Files Path Paths]))
 
+;; NOTE: For the hackathon, the code was expected to run on windows. So the dest dir was on the C:/ drive
+;; and the source file was on an Isolon NAS identified by a UNC path. That's why the copy file function is
+;; so specific in how it handles file copy
 (defn copy-file-locally [remote-source-name local-dest-name]
   (let [remote-source-name (format "file://%s" (.replace remote-source-name "\\" "/"))
         local-dest-name (format "file:///%s" local-dest-name)
@@ -15,6 +18,7 @@
         dest-path (Paths/get (URI/create local-dest-name))]
     (Files/copy source-path dest-path (into-array StandardCopyOption [StandardCopyOption/REPLACE_EXISTING]))))
 
+;; NOTE: See commens above copy-file-locally which explains why filename handling is so specific
 (defn transcode-file [message]
   (when message
     (try
@@ -53,8 +57,8 @@
       (let [total-messages-processed (atom 0)]
         (loop [ret-vals (read-and-transcode-messages concurrent-processes consumer)]
           (let [messages-processed (count (filter true? ret-vals))]
-            (swap! total-messages-processed #(+ %1 messages-processed))          
-            (when (> messages-processed 0)                                         
+            (swap! total-messages-processed #(+ %1 messages-processed))
+            (when (> messages-processed 0)
               (recur (read-and-transcode-messages concurrent-processes consumer)))))
         (println (format "Transcoder agent finished processing %d messages at : %s"
                          @total-messages-processed (.toString (Date.))))))))

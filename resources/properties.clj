@@ -1,3 +1,5 @@
+;; NOTE: see comments in com.dg.vts.transcoder/copy-file-locally function for particulars on the
+;; dest dir and the source file
 (let [props {:dest-dir "<path to destination folder>"
              :ffmpeg-command "ffmpeg -i %s -y -vcodec mpeg4 -acodec aac -strict -2 %s/%s.mp4"
              :activemq-url "tcp://localhost:61616?jms.prefetchPolicy.queuePrefetch=1"
