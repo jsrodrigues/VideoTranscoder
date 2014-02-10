@@ -34,7 +34,7 @@
                                                      local-source (app-props/props :dest-dir) local-base-filename) " "))
                       :exit)]
           (println (format "%s transcoding message: %s"
-                           (if (= retval 0) "Successfully finished" "Error while")
+                           (if (zero? retval) "Successfully finished" "Error while")
                            message-id))
           (io/delete-file local-source))
         true)
@@ -52,16 +52,16 @@
 (defn run-transcoder-agent []
   (let [concurrent-processes (app-props/props :concurrent-processes)]
     (println (format "Running transcoder agent with %d concurrent processes" concurrent-processes))
-    (println (format "Transcoder agent started at : %s" (.toString (Date.))))
+    (println (format "Transcoder agent started at : %s" (str (Date.))))
     (amq/with-consumer
       (let [total-messages-processed (atom 0)]
         (loop [ret-vals (read-and-transcode-messages concurrent-processes consumer)]
           (let [messages-processed (count (filter true? ret-vals))]
             (swap! total-messages-processed #(+ %1 messages-processed))
-            (when (> messages-processed 0)
+            (when (pos? messages-processed)
               (recur (read-and-transcode-messages concurrent-processes consumer)))))
         (println (format "Transcoder agent finished processing %d messages at : %s"
-                         @total-messages-processed (.toString (Date.))))))))
+                         @total-messages-processed (str (Date.))))))))
 
 (defn benchmark-transcoding [concurrent-processes max-n]
   (println (format "Processing %d messages : " (* concurrent-processes max-n)))
